@@ -1,0 +1,42 @@
+---
+- name: Configure apache2/httpd on all servers
+  hosts: all
+  tasks:
+    - name: Install apache2 on Ubuntu server
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Install httpd on Centos servers
+      yum:
+        name: httpd
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+    - name: Edit the index.html file
+      copy:
+        content: "IntelliQIT"
+        dest: /var/www/html/index.html
+    - name: Restart apache2 on Ubuntu
+      service:
+        name: apache2
+        state: restarted
+      when: ansible_distribution == "Ubuntu"
+    - name: Restart httpd on Centos
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_distribution == "CentOS"
+    - name: Check apache2/httpd response on all servers
+      uri:
+        url: "{{item}}"
+        status_code: 200
+      with_items:
+        - http://172.31.7.68
+        - http://172.31.27.65
+        - http://172.31.26.107
+
+
+
+
